@@ -85,8 +85,8 @@ class Kinyarwanda:
             'rab': ['rabu'],
             'managri': ['minagiri']
         }
-        if os.path.exists('KINLP/data/agai_pronunciation_adapter.tsv'):
-            with open('KINLP/data/agai_pronunciation_adapter.tsv', 'r') as tsv:
+        if os.path.exists('agai_pronunciation_adapter.tsv'):
+            with open('agai_pronunciation_adapter.tsv', 'r') as tsv:
                 for line in tsv:
                     tokens = line.rstrip('\n').split('\t')
                     if len(tokens) == 2:

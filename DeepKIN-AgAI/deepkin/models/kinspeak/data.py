@@ -21,8 +21,8 @@ audio_max_duration = 25.0
 labels_min_length = 4
 labels_max_length = 1024
 
-cv_audio_clips_dir = "KINLP/data/cv-corpus-20.0-2024-12-06/rw/clips/"
-top_cv_file = 'KINLP/data/top_cv_train.tsv'
+cv_audio_clips_dir = "data/cv-corpus-20.0-2024-12-06/rw/clips/"
+top_cv_file = 'data/top_cv_train.tsv'
 
 class SampleConfig:
     def __init__(self):

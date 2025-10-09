@@ -18,6 +18,6 @@ python3 deepkin/train/flex_trainer.py  \
     --train_log_steps=10  \
     --checkpoint_steps=1000 \
     --load_saved_model=True  \
-    --tts_data_dir="KINLP/data/TTS_DATA" \
-    --tts_train_data_file="tts_data.psv" \
-    --model_save_path="KINLP/data/flex_tts_base.pt"
+    --tts_data_dir="kinya-ag-tts" \
+    --tts_train_data_file="tts_train_data.psv" \
+    --model_save_path="kinya_flex_tts_base.pt"

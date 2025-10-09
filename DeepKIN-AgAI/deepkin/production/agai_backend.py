@@ -23,7 +23,7 @@ from flask import Flask, request
 agai_model_setup = None
 
 documents_data = dict()
-AGAI_DATA_DIR = 'KINLP/data/agai'
+AGAI_DATA_DIR = 'data/agai'
 
 Doc_Mean = None
 Doc_Stdev = None
@@ -42,10 +42,10 @@ def aggregate_embeddings():
     (model, device, lib, ffi) = agai_model_setup
     model.eval()
 
-    qa_query_id = 'KINLP/data/AgQA_2025-05-22/AgQA_query_id_2025-05-22.txt'
-    qa_query_text = 'KINLP/data/AgQA_2025-05-22/parsed_AgQA_query_text_2025-05-22.txt'
-    qa_passage_id = 'KINLP/data/AgQA_2025-05-22/AgQA_passage_id_2025-05-22.txt'
-    qa_passage_text = 'KINLP/data/AgQA_2025-05-22/parsed_AgQA_passage_text_2025-05-22.txt'
+    qa_query_id = 'data/AgQA_2025-05-22/AgQA_query_id_2025-05-22.txt'
+    qa_query_text = 'data/AgQA_2025-05-22/parsed_AgQA_query_text_2025-05-22.txt'
+    qa_passage_id = 'data/AgQA_2025-05-22/AgQA_passage_id_2025-05-22.txt'
+    qa_passage_text = 'data/AgQA_2025-05-22/parsed_AgQA_passage_text_2025-05-22.txt'
 
     all_queries = {idx: ParsedFlexSentence(txt).trim(508) for idx, txt in zip(read_lines(qa_query_id),
                                                               read_lines(qa_query_text))}
@@ -85,11 +85,11 @@ def aggregate_embeddings():
 
 
 def agai_setup(rank=0,
-               sock_file="KINLP/data/run/deepkin.sock"):
+               sock_file="data/run/deepkin.sock"):
     global agai_model_setup
     global documents_data
 
-    AgQA_model_file = 'KINLP/data/agai_real_morphobert_large_qaret_512_eval_2025-05-27.pt_14.8K.pt'
+    AgQA_model_file = 'data/agai_real_morphobert_large_qaret_512_eval_2025-05-27.pt_14.8K.pt'
 
     agai_model_setup = init_qaret_inference_setup(AgQA_model_file, rank=rank, sock_file = sock_file)
     (AgQA_ColBERT, device, lib, ffi) = agai_model_setup

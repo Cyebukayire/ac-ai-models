@@ -19,7 +19,7 @@ class TokenStats:
         self.pct_rank = int(100.0 * float(id) /float(tot))
 
 def get_all_token_stats():
-    all_tokens_file = "KINLP/data/AllTokens.tsv"
+    all_tokens_file = "data/AllTokens.tsv"
     global all_tokens_stats
     lines = read_lines(all_tokens_file)
     tokens = [TokenStats(line,id,len(lines)) for id,line in enumerate(lines)]

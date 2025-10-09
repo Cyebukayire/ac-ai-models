@@ -402,7 +402,7 @@ class KinspeakASRInferenceModel(torch.nn.Module):
                                           pretrained_ctxt_encoder_file=None)
         state_dict = torch.load(trained_model_file, map_location='cpu')
         self.asr_model.load_state_dict(state_dict['model_state_dict'])
-        self.dictionary = build_kinyarwanda_dictionary_trie(filename='KINLP/data/KinTokens.tsv')
+        self.dictionary = build_kinyarwanda_dictionary_trie(filename='data/KinTokens.tsv')
 
     def forward(self, waveform) -> str:
         log_eps = 1e-36

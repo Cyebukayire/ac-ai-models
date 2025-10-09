@@ -5,8 +5,7 @@ from deepkin.models.flex_tts import FlexKinyaTTS, FlexTTSTrainer
 from deepkin.modules.tts_commons import intersperse
 
 if __name__ == '__main__':
-
-    trained_model = FlexTTSTrainer.from_pretrained('KINLP/data/flex_tts_base_agktjw_trainer_2025-06-01.pt')
+    trained_model = FlexTTSTrainer.from_pretrained('kinya_flex_tts_base_trained.pt')
     trained_model.flex_tts.eval()
     tts = FlexKinyaTTS(trained_model.flex_tts)
     tts.flex_tts.eval()
@@ -22,6 +21,6 @@ if __name__ == '__main__':
         text_id_sequence = text_to_sequence(text, norm=True)
         text_id_sequence = intersperse(text_id_sequence, 0)
 
-        torchaudio.save(f"KINLP/data/flex_tts_sample_0_{i}.wav", tts(text_id_sequence, 0), 24000)
-        torchaudio.save(f"KINLP/data/flex_tts_sample_1_{i}.wav", tts(text_id_sequence, 1), 24000)
-        torchaudio.save(f"KINLP/data/flex_tts_sample_2_{i}.wav", tts(text_id_sequence, 2), 24000)
+        torchaudio.save(f"flex_tts_sample_0_{i}.wav", tts(text_id_sequence, 0), 24000)
+        torchaudio.save(f"flex_tts_sample_1_{i}.wav", tts(text_id_sequence, 1), 24000)
+        torchaudio.save(f"flex_tts_sample_2_{i}.wav", tts(text_id_sequence, 2), 24000)

@@ -32,7 +32,7 @@ def next_syllab_options_s2s(dictionary:Trie, parent_node:TrieNode):
     else:
         return [(k,parent_node.children[k]) for k in parent_node.children.keys()] + [(KINSPEAK_VOCAB['\''],None)]
 
-def build_kinyarwanda_dictionary_trie(filename='KINLP/data/KinTokens.tsv') -> Trie:
+def build_kinyarwanda_dictionary_trie(filename='data/KinTokens.tsv') -> Trie:
     trie = Trie()
     lines = []
     with open(filename, 'rb') as f:
@@ -147,7 +147,7 @@ if __name__ == '__main__':
     for test in tests:
         seq = text_to_id_sequence(test)
         print(test, [KINSPEAK_VOCAB_IDX[id] for id in seq], id_sequence_to_text(seq))
-    file = "KINLP/data/kinspeak/jw_speech/samples/new_txt/77327059-53be-42ee-8ea1-21e1b2c30999_299_203471_209245_3171_3273.txt"
+    file = "data/kinspeak/jw_speech/samples/new_txt/77327059-53be-42ee-8ea1-21e1b2c30999_299_203471_209245_3171_3273.txt"
     f = open(file, 'r')
     test = f.read()
     f.close()

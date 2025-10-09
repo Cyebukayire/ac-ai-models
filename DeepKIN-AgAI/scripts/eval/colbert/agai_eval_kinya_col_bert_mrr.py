@@ -7,13 +7,14 @@ from deepkin.data.morpho_qa_triple_data import DOCUMENT_TYPE_ID, QUESTION_TYPE_I
 from deepkin.models.kinyabert import KinyaColBERT_from_pretrained
 from deepkin.utils.misc_functions import read_lines
 
-if __name__ == '__main__':
-    rank = 0
+def eval_kinya_col_bert(rank = 0):
+    pretrained_model_file = f'kinya_colbert_large_rw_ag_retrieval_finetuned_512D.pt'
+    keyword = f'kinya_colbert_large'
 
-    qa_query_id = 'KINLP/data/AgQA_2025-05-22/AgQA_query_id_2025-05-22.txt'
-    qa_query_text = 'KINLP/data/AgQA_2025-05-22/parsed_AgQA_query_text_2025-05-22.txt'
-    qa_passage_id = 'KINLP/data/AgQA_2025-05-22/AgQA_passage_id_2025-05-22.txt'
-    qa_passage_text = 'KINLP/data/AgQA_2025-05-22/parsed_AgQA_passage_text_2025-05-22.txt'
+    qa_query_id = 'kinya-ag-retrieval/rw_ag_retrieval_query_id.txt'
+    qa_query_text = 'kinya-ag-retrieval/parsed_rw_ag_retrieval_query_text.txt'
+    qa_passage_id = 'kinya-ag-retrieval/rw_ag_retrieval_passage_id.txt'
+    qa_passage_text = 'kinya-ag-retrieval/parsed_rw_ag_retrieval_passage_text.txt'
 
     all_queries = {idx: ParsedFlexSentence(txt) for idx, txt in zip(read_lines(qa_query_id), read_lines(qa_query_text))}
     all_passages = {idx: ParsedFlexSentence(txt) for idx, txt in zip(read_lines(qa_passage_id), read_lines(qa_passage_text))}
@@ -21,9 +22,6 @@ if __name__ == '__main__':
     print(f'Got: {len(all_queries)} queries, {len(all_passages)} passages', flush=True)
 
     device = torch.device('cuda:%d' % rank)
-
-    pretrained_model_file = f'KINLP/data/kinyacolbert_128_eval_2025-05-27.pt_14.8K.pt'
-    keyword = f'kinyacolbert_128_eval_2025-05-27.pt_14.8K'
 
     model, args = KinyaColBERT_from_pretrained(device, pretrained_model_file, ret_args=True)
     model.float()
@@ -63,8 +61,8 @@ if __name__ == '__main__':
         Query_Stdev = QueryPool.std(dim=0)
         del QueryPool
 
-        dev_triples = 'KINLP/data/AgQA_2025-05-22/AgQA_qpntriplets_dev_2025-05-22.tsv'
-        test_triples = 'KINLP/data/AgQA_2025-05-22/AgQA_qpntriplets_test_2025-05-22.tsv'
+        dev_triples = 'kinya-ag-retrieval/rw_ag_retrieval_qpntriplets_dev.tsv'
+        test_triples = 'kinya-ag-retrieval/rw_ag_retrieval_qpntriplets_test.tsv'
 
         EVAL_SETS = [('DEV', dev_triples),
                      ('TEST', test_triples)]
@@ -89,7 +87,6 @@ if __name__ == '__main__':
                 with torch.no_grad():
                     score = model.pairwise_score(Q,D).squeeze().item()
                 score = score / Q.size(1)
-                template_scores = []
                 results.append((score, doc_id))
             Total += 1.0
             results = sorted(results, key=lambda x: x[0], reverse=True)
@@ -100,9 +97,12 @@ if __name__ == '__main__':
                 MRR[i] += (top_rr[0] if (len(top_rr) > 0) else 0.0)
         print(f'-------------------------------------------------------------------------------------------------')
         for i, t in enumerate(Top):
-            print(f'@{eval_set_name} Final KinyaBERT-Large-ColBERT-{args.colbert_embedding_dim} AgQA {eval_set_name} Set Top#{t} Accuracy:',
+            print(f'@{eval_set_name} Final {keyword}-{args.colbert_embedding_dim} kinya-ag-retrieval {eval_set_name} Set Top#{t} Accuracy:',
                   f'{(100.0 * TopAcc[i] / Total): .1f}% ({TopAcc[i]:.0f} / {Total:.0f})')
         for i, t in enumerate(MTop):
-            print(f'@{eval_set_name} Final KinyaBERT-Large-ColBERT-{args.colbert_embedding_dim} AgQA {eval_set_name} Set MRR@{t}:',
+            print(f'@{eval_set_name} Final {keyword}-{args.colbert_embedding_dim} kinya-ag-retrieval {eval_set_name} Set MRR@{t}:',
                   f'{(100.0 * MRR[i] / Total): .1f}% ({MRR[i]:.0f} / {Total:.0f})')
         print(f'-------------------------------------------------------------------------------------------------', flush=True)
+
+if __name__ == '__main__':
+    eval_kinya_col_bert(rank = 0)

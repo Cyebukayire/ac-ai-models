@@ -13,7 +13,7 @@ python3 deepkin/train/flex_trainer.py  \
     --peak_lr=6e-4  \
     --lr_decay_style="linear" \
     --num_iters=50000  \
-    --train_parsed_corpus="KINLP/data/parsed_corpus.txt"  \
+    --train_parsed_corpus="morpho_parsed_corpus.txt"  \
     --number_of_load_batches=4096000  \
     --dataset_max_seq_len=512  \
     --use_iterable_dataset=True  \
@@ -23,4 +23,4 @@ python3 deepkin/train/flex_trainer.py  \
     --checkpoint_steps=100 \
     --validation_steps=1000 \
     --load_saved_model=True  \
-    --model_save_path="KINLP/data/kinyabert_base_ddp.pt"
+    --model_save_path="kinyabert_base_ddp.pt"

@@ -10,10 +10,10 @@ from deepkin.models.morpho_bert import KinyaColBERT_from_pretrained
 
 def init_qaret_inference_setup(pretrained_colbert_model_file: str,
                                rank=0,
-                               sock_file="KINLP/data/run/deepkin.sock") -> Tuple:
+                               sock_file="data/run/deepkin.sock") -> Tuple:
     build_kinlpy_lib()
     from kinlpy import ffi, lib
-    kinlp_conf = 'KINLP/data/config_deepkin.conf'
+    kinlp_conf = 'data/config_deepkin.conf'
     lib.init_kinlp_socket(kinlp_conf.encode('utf-8'), sock_file.encode('utf-8'))
 
     device = torch.device('cuda:%d' % rank)
