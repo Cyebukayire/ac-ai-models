@@ -105,7 +105,7 @@ pip install ./ --no-build-isolation
 #### 2.1.1. Training a KinyaBERT model from scratch
 
 1. Prepare a Kinyarwanda text corpus file containing multiple documents by placing one sentence per line and an empty line between documents. Use the provided [sample_corpus.txt](scripts/scratch/sample_corpus.txt) file as a reference.
-2. Parse the text corpus with MorphoKIN. Adjust the number of parallel threads based on your CPU core count using *--num_threads* option.
+2. Parse the text corpus with [MorphoKIN](MorphoKIN.md). Adjust the number of parallel threads based on your CPU core count using *--num_threads* option.
 ```shell
 
 # Ensure you have the free license file, e.g.:
@@ -130,7 +130,7 @@ morphokin --morphokin_working_dir /MORPHODATA \
 exit
 
 ```
-The sentences in the generated file ("pre-parsed" by MorphoKIN) is not in original order (this is done for faster parallel processing);
+The sentences in the generated file ("pre-parsed" by [MorphoKIN](MorphoKIN.md)) is not in original order (this is done for faster parallel processing);
 you need to re-arrange the sentences by running the provided "post-ptf" python script.
 ```shell
 
