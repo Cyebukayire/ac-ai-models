@@ -16,7 +16,7 @@ webcolors
 typo
 colorama
 minineedle
-ragatouille
+ragatouille<0.0.10
 transformers
 tokenizers
 g2pk2

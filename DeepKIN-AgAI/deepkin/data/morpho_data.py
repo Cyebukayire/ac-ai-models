@@ -629,7 +629,7 @@ def prepare_morpho_data_from_sentence_multi_morph(cfg: FlexConfig, device: str, 
 def send_tuple_to(batch_item:Tuple, device: torch.device, non_blocking=True, top=0, args=None):
     if (args is not None) and (top == 0):
         model_type = args.model_variant.split(':')[0]
-        if 'morphobert_qaret' in model_type:
+        if 'kinya_colbert' in model_type:
             batch_item = tuple(batch_item[0]), tuple(batch_item[1])
     return tuple([it.to(device, non_blocking=non_blocking) if torch.is_tensor(it) else (send_tuple_to(it, device, non_blocking=non_blocking, top=(top+1), args=args) if (type(it) is tuple) else it) for it in batch_item])
 

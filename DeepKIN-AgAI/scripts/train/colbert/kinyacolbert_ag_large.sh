@@ -11,7 +11,7 @@
 #    --use_ddp=False \
 
 python3 deepkin/train/flex_trainer.py  \
-    --model_variant="kinyabert_qaret:large" \
+    --model_variant="kinya_colbert:large" \
     --colbert_embedding_dim=512 \
     --gpus=1 \
     --batch_size=32  \

@@ -2,17 +2,21 @@ from ragatouille import RAGTrainer
 
 from deepkin.utils.misc_functions import time_now
 
+# This is not yet working due to BUG In RAGatouille:
+# https://github.com/AnswerDotAI/RAGatouille/issues/275
+
 if __name__ == "__main__":
+    DATA_DIR = '/home/ubuntu/DATA'
     print(time_now(), 'Reading data ...', flush=True)
-    with open('kinya-ag-retrieval/rw_ag_retrieval_answers.tsv', 'r', encoding='utf-8') as f:
+    with open(f'{DATA_DIR}/kinya-ag-retrieval/rw_ag_retrieval_answers.tsv', 'r', encoding='utf-8') as f:
         answers = [l.rstrip('\n').split('\t') for l in f.readlines()]
     answers = {tks[0]:tks[1] for tks in answers}
 
-    with open('kinya-ag-retrieval/rw_ag_retrieval_questions.tsv', 'r', encoding='utf-8') as f:
+    with open(f'{DATA_DIR}/kinya-ag-retrieval/rw_ag_retrieval_questions.tsv', 'r', encoding='utf-8') as f:
         questions = [l.rstrip('\n').split('\t') for l in f.readlines()]
     questions = {tks[0]:tks[1] for tks in questions}
 
-    with open('kinya-ag-retrieval/rw_ag_retrieval_qpntriplets_train.tsv', 'r', encoding='utf-8') as f:
+    with open(f'{DATA_DIR}/kinya-ag-retrieval/rw_ag_retrieval_qpntriplets_train.tsv', 'r', encoding='utf-8') as f:
         triplets = [l.rstrip('\n').split('\t') for l in f.readlines()]
 
     triplets = [(questions[tks[0]], answers[tks[1]], answers[tks[2]]) for tks in triplets]
@@ -21,7 +25,7 @@ if __name__ == "__main__":
 
     print(time_now(), 'Preparing data ...', flush=True)
 
-    trainer.prepare_training_data(raw_data=triplets, data_out_path="ragatouille-kinya-colbert/data/", mine_hard_negatives=False)
+    trainer.prepare_training_data(raw_data=triplets, data_out_path=f'{DATA_DIR}/new-ragatouille-kinya-colbert/data/', mine_hard_negatives=False)
 
     print(time_now(), 'Training AfroColBERT ...', flush=True)
 

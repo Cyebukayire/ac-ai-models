@@ -102,7 +102,7 @@ pip install ./ --no-build-isolation
 
 ### 2.1 Training
 
-#### 2.1.1. Training a KinyaBERT model from scratch
+#### 2.1.1. Pre-Training a KinyaBERT model from scratch
 
 1. Prepare a Kinyarwanda text corpus file containing multiple documents by placing one sentence per line and an empty line between documents. Use the provided [sample_corpus.txt](scripts/scratch/sample_corpus.txt) file as a reference.
 2. Parse the text corpus with [MorphoKIN](MorphoKIN.md). Adjust the number of parallel threads based on your CPU core count using *--num_threads* option.
@@ -179,24 +179,94 @@ python3 DeepKIN-AgAI/deepkin/train/flex_trainer.py  \
 ```
 
 #### 2.1.2. Fine-tuning a pretrained KinyaBERT model into a KinyaColBERT retrieval model
+
+The following example uses a pre-trained KinyaBERT (i.e. Hugging Face: "C4IR-RW/kinyabert") base model (107M paremeters).
+
+The training data for agricultural retrieval (i.e. Hugging Face: "C4IR-RW/kinya-ag-retrieval"") has been morphologically parsed already, but for another domain, [MorphoKIN](MorphoKIN.md) parsing will be performed first.
+
 ```shell
 
-# TBD
+# 1. Copy "kinya-ag-retrieval" dataset from Hugging face into a local directory, e.g. /home/ubuntu/DATA/kinya-ag-retrieval/
+
+# 2. Copy "kinyabert_base_pretrained.pt" model into a local directory, e.g. /home/ubuntu/DATA/kinyabert_base_pretrained.pt
+
+# 3. Run the following training script:
+
+python3 DeepKIN-AgAI/deepkin/train/flex_trainer.py  \
+    --model_variant="kinya_colbert:base" \
+    --colbert_embedding_dim=512 \
+    --gpus=1 \
+    --batch_size=12  \
+    --accumulation_steps=10  \
+    --dataloader_num_workers=4  \
+    --dataloader_persistent_workers=True  \
+    --dataloader_pin_memory=True  \
+    --use_ddp=False \
+    --use_mtl_optimizer=False \
+    --warmup_iter=2000 \
+    --peak_lr=1e-5  \
+    --lr_decay_style="cosine" \
+    --num_iters=152630  \
+    --dataset_max_seq_len=512  \
+    --use_iterable_dataset=False  \
+    --train_log_steps=1  \
+    --checkpoint_steps=1000 \
+    --pretrained_bert_model_file="/home/ubuntu/DATA/kinyabert_base_pretrained.pt" \
+    --qa_train_query_id="/home/ubuntu/DATA/kinya-ag-retrieval/rw_ag_retrieval_query_id.txt" \
+    --qa_train_query_text="/home/ubuntu/DATA/kinya-ag-retrieval/parsed_rw_ag_retrieval_query_text.txt" \
+    --qa_train_passage_id="/home/ubuntu/DATA/kinya-ag-retrieval/rw_ag_retrieval_passage_id.txt" \
+    --qa_train_passage_text="/home/ubuntu/DATA/kinya-ag-retrieval/parsed_rw_ag_retrieval_passage_text.txt" \
+    --qa_train_qpn_triples="/home/ubuntu/DATA/kinya-ag-retrieval/rw_ag_retrieval_qpntriplets_all.tsv" \
+    --qa_dev_query_id="/home/ubuntu/DATA/kinya-ag-retrieval/rw_ag_retrieval_query_id.txt" \
+    --qa_dev_query_text="/home/ubuntu/DATA/kinya-ag-retrieval/parsed_rw_ag_retrieval_query_text.txt" \
+    --qa_dev_passage_id="/home/ubuntu/DATA/kinya-ag-retrieval/rw_ag_retrieval_passage_id.txt" \
+    --qa_dev_passage_text="/home/ubuntu/DATA/kinya-ag-retrieval/parsed_rw_ag_retrieval_passage_text.txt" \
+    --qa_dev_qpn_triples="/home/ubuntu/DATA/kinya-ag-retrieval/rw_ag_retrieval_qpntriplets_dev.tsv" \
+    --load_saved_model=True  \
+    --model_save_path="/home/ubuntu/DATA/kinya_colbert_base_rw_ag_retrieval_new.pt"
+  
 
 ```
 
+#### 2.1.3. Training a multi-speaker Text-to-Speech model from scratch
 
-#### 2.1.3. Training a RAGatouille-based ColBERT retrieval model (No morphological model needed)
+1. First download "C4IR-RW/kinya-ag-tts" dataset from Hugging face and place it in a local directory, e.g. */home/ubuntu/DATA*
+
+2. The run the processing script to normalize the text and generate a training set data file.
+The training data file is pipe-separated and each line contains the following: AUDIO_FILE|SPEAKER_ID|NORMALIZED_TEXT
+
 ```shell
 
-# TBD
+python3 DeepKIN-AgAI/scripts/train/tts/preprocess_tts_data.py "/home/ubuntu/DATA" "ag_tts_train_data.psv"
 
 ```
 
-#### 2.1.4. Training a Text-to-Speech model from scratch
+3. Launch the TTS training script below:
+
 ```shell
 
-# TBD
+python3 DeepKIN-AgAI/deepkin/train/flex_trainer.py  \
+    --model_variant="flex_tts:base" \
+    --gpus=1 \
+    --enable_amp=False \
+    --use_ddp=False \
+    --use_mtl_optimizer=False \
+    --num_losses=8 \
+    --warmup_iter=32000 \
+    --peak_lr=2e-4  \
+    --num_iters=2000000  \
+    --batch_size=16 \
+    --accumulation_steps=2  \
+    --dataloader_num_workers=8  \
+    --dataloader_persistent_workers=True  \
+    --dataloader_pin_memory=True  \
+    --use_iterable_dataset=False \
+    --train_log_steps=1  \
+    --checkpoint_steps=1000 \
+    --load_saved_model=True  \
+    --tts_data_dir="/home/ubuntu/DATA" \
+    --tts_train_data_file="ag_tts_train_data.psv" \
+    --model_save_path="/home/ubuntu/DATA/kinya_flex_tts_base_trainer_new.pt"
 
 ```
 

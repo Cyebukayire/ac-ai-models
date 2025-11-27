@@ -89,7 +89,7 @@ def agai_setup(rank=0,
     global agai_model_setup
     global documents_data
 
-    AgQA_model_file = 'data/agai_real_morphobert_large_qaret_512_eval_2025-05-27.pt_14.8K.pt'
+    AgQA_model_file = 'data/kinya_colbert_large_rw_ag_retrieval_finetuned_512D.pt'
 
     agai_model_setup = init_qaret_inference_setup(AgQA_model_file, rank=rank, sock_file = sock_file)
     (AgQA_ColBERT, device, lib, ffi) = agai_model_setup
