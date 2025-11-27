@@ -4,23 +4,21 @@ from typing import Tuple
 
 import torch
 
-from deepkin.clib.libkinlp.kinlpy import build_kinlpy_lib
+from deepkin.clib.libkinlp.uds_client import UnixSocketClient
 from deepkin.models.kinyabert import KinyaColBERT
 
 
-def init_qaret_inference_setup(pretrained_colbert_model_file: str,
-                               rank=0,
-                               sock_file="data/run/deepkin.sock") -> Tuple:
-    build_kinlpy_lib()
-    from kinlpy import ffi, lib
-    kinlp_conf = 'data/config_deepkin.conf'
-    lib.init_kinlp_socket(kinlp_conf.encode('utf-8'), sock_file.encode('utf-8'))
-
+def init_retrieval_inference_setup(pretrained_colbert_model_file: str,
+                                   rank=0,
+                                   sock_file="/home/ubuntu/MORPHODATA/run/morpho.sock",
+                                   max_retries=5,
+                                   retry_delay_seconds=2.0) -> Tuple[KinyaColBERT, torch.device, UnixSocketClient]:
+    uds_client = UnixSocketClient(sock_file, max_retries=max_retries, retry_delay=retry_delay_seconds)
     device = torch.device('cuda:%d' % rank)
     torch.cuda.set_device(rank)
 
-    ColBERT = KinyaColBERT.from_pretrained(device, pretrained_colbert_model_file)
-    ColBERT.float()
-    ColBERT.eval()
+    kinya_colbert_model = KinyaColBERT.from_pretrained(device, pretrained_colbert_model_file)
+    kinya_colbert_model.float()
+    kinya_colbert_model.eval()
 
-    return (ColBERT, device, lib, ffi)
+    return (kinya_colbert_model, device, uds_client)

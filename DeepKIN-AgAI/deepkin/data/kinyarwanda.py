@@ -1,3 +1,9 @@
+from __future__ import print_function, division, annotations
+
+# Ignore warnings
+import warnings
+warnings.filterwarnings("ignore")
+
 import os
 import unicodedata
 import re

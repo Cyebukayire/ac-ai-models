@@ -275,36 +275,65 @@ python3 DeepKIN-AgAI/deepkin/train/flex_trainer.py  \
 #### 2.2.1. Evaluating a trained KinyaColBERT retrieval model
 ```shell
 
-# TBD
+python3 DeepKIN-AgAI/scripts/eval/colbert/agai_eval_kinya_col_bert_mrr.py "/home/ubuntu/DATA"
 
 ```
 
 
-#### 2.2.2. Evaluating a trained RAGatouille-based ColBERT retrieval model
+#### 2.2.2. Evaluating a trained Text-to-Speech model
 ```shell
 
-# TBD
+python3 DeepKIN-AgAI/scripts/eval/tts/eval_flex_tts.py "/home/ubuntu/DATA"
 
 ```
 
-#### 2.2.3. Evaluating a trained Text-to-Speech model
+#### 2.2.3. Running an API server for KinyaColBERT Ag retrieval
+
+1. First, run [MorphoKIN](MorphoKIN.md) server on Unix domain socket:
+
 ```shell
 
-# TBD
+# Launch a daemon container
+
+docker run -d -v /home/ubuntu/MORPHODATA:/MORPHODATA \
+  --gpus all -it morphokin:latest morphokin \
+  --morphokin_working_dir /MORPHODATA \
+  --morphokin_config_file /MORPHODATA/data/analysis_config_file.conf  \
+  --task RMS \
+  --kinlp_license /MORPHODATA/licenses/KINLP_LICENSE_FILE.dat  \
+  --ca_roots_pem_file /MORPHODATA/data/roots.pem \
+  --morpho_socket /MORPHODATA/run/morpho.sock
+
 
 ```
 
-#### 2.2.4. Running an API server for KinyaColBERT retrieval
+2. Wait for MorphoKIN socket server to be ready by monitoring the container logs.
+
 ```shell
 
-# TBD
+docker container ls
+
+docker logs -f <CONTAINER ID>
+
+# MorphoKIN server is ready once you see a message like this: MorphoKin server listening on UNIX SOCKET: /MORPHODATA/run/morpho.sock
 
 ```
 
-#### 2.2.5. Running an API server for Text-to-Speech
+3. Then, run the retrieval API server:
+
 ```shell
 
-# TBD
+mkdir -p /home/ubuntu/DATA/agai_index
+
+python3 DeepKIN-AgAI/deepkin/production/agai_backend.py
+
+```
+
+#### 2.2.4. Running an API server for Text-to-Speech
+
+```shell
+
+python3 DeepKIN-AgAI/deepkin/production/tts_backend.py
 
 ```
 

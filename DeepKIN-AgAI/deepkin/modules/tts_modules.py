@@ -8,18 +8,33 @@ import torchaudio
 import torchaudio.transforms as T
 from scipy.signal import get_window
 from torch import nn
+from torch.amp import custom_fwd
 from torch.nn import Conv1d, ConvTranspose1d, Conv2d
 from torch.nn import functional as F
 from torch.nn.utils import weight_norm, remove_weight_norm
-from torch.amp import custom_fwd
 
-import monotonic_align
 from deepkin.data.kinya_norm import tts_symbols, text_to_sequence
 from deepkin.modules.tts_arguments import TTSArguments
 from deepkin.modules.tts_attentions import Encoder, SingleLayerEncoder, TransLayerNorm
 from deepkin.modules.tts_commons import init_weights, get_padding, sequence_mask, fused_add_tanh_sigmoid_multiply, \
     generate_path, rand_slice_segments, intersperse
 
+
+def maximum_path(neg_cent, mask):
+  from monotonic_align.core import maximum_path_c
+  """ Cython optimized version.
+  neg_cent: [b, t_t, t_s]
+  mask: [b, t_t, t_s]
+  """
+  device = neg_cent.device
+  dtype = neg_cent.dtype
+  neg_cent = neg_cent.data.cpu().numpy().astype(np.float32)
+  path = np.zeros(neg_cent.shape, dtype=np.int32)
+
+  t_t_max = mask.sum(1)[:, 0].data.cpu().numpy().astype(np.int32)
+  t_s_max = mask.sum(2)[:, 0].data.cpu().numpy().astype(np.int32)
+  maximum_path_c(path, neg_cent, t_t_max, t_s_max)
+  return torch.from_numpy(path).to(device=device, dtype=dtype)
 
 class ResBlock1(torch.nn.Module):
     def __init__(self, channels, kernel_size=3, dilation=(1, 3, 5)):
@@ -990,7 +1005,7 @@ class FlexTTS(nn.Module):
                 neg_cent = neg_cent + epsilon
 
             attn_mask = torch.unsqueeze(x_mask, 2) * torch.unsqueeze(y_mask, -1)
-            attn = monotonic_align.maximum_path(neg_cent, attn_mask.squeeze(1)).unsqueeze(1).detach()
+            attn = maximum_path(neg_cent, attn_mask.squeeze(1)).unsqueeze(1).detach()
 
         w = attn.sum(2)
 

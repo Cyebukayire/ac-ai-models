@@ -1,3 +1,5 @@
+import sys
+
 import progressbar
 import torch
 import torch.nn.functional as F
@@ -7,14 +9,14 @@ from deepkin.data.morpho_qa_triple_data import DOCUMENT_TYPE_ID, QUESTION_TYPE_I
 from deepkin.models.kinyabert import KinyaColBERT
 from deepkin.utils.misc_functions import read_lines
 
-def eval_kinya_col_bert(rank = 0):
-    pretrained_model_file = f'kinya_colbert_large_rw_ag_retrieval_finetuned_512D.pt'
+def eval_kinya_col_bert(DATA_DIR: str, rank = 0):
+    pretrained_model_file = f'{DATA_DIR}/kinya_colbert_large_rw_ag_retrieval_finetuned_512D.pt'
     keyword = f'kinya_colbert_large'
 
-    qa_query_id = 'kinya-ag-retrieval/rw_ag_retrieval_query_id.txt'
-    qa_query_text = 'kinya-ag-retrieval/parsed_rw_ag_retrieval_query_text.txt'
-    qa_passage_id = 'kinya-ag-retrieval/rw_ag_retrieval_passage_id.txt'
-    qa_passage_text = 'kinya-ag-retrieval/parsed_rw_ag_retrieval_passage_text.txt'
+    qa_query_id = f'{DATA_DIR}/kinya-ag-retrieval/rw_ag_retrieval_query_id.txt'
+    qa_query_text = f'{DATA_DIR}/kinya-ag-retrieval/parsed_rw_ag_retrieval_query_text.txt'
+    qa_passage_id = f'{DATA_DIR}/kinya-ag-retrieval/rw_ag_retrieval_passage_id.txt'
+    qa_passage_text = f'{DATA_DIR}/kinya-ag-retrieval/parsed_rw_ag_retrieval_passage_text.txt'
 
     all_queries = {idx: ParsedFlexSentence(txt) for idx, txt in zip(read_lines(qa_query_id), read_lines(qa_query_text))}
     all_passages = {idx: ParsedFlexSentence(txt) for idx, txt in zip(read_lines(qa_passage_id), read_lines(qa_passage_text))}
@@ -34,7 +36,7 @@ def eval_kinya_col_bert(rank = 0):
         print(f'{keyword} Embedding passages ...', flush=True)
         with progressbar.ProgressBar(max_value=len(all_passages), redirect_stdout=True) as bar:
             for itr, (passage_id, passage) in enumerate(all_passages.items()):
-                if (itr % 1000) == 0:
+                if (itr % 100) == 0:
                     bar.update(itr)
                 passage.trim(508)
                 with torch.no_grad():
@@ -61,8 +63,8 @@ def eval_kinya_col_bert(rank = 0):
         Query_Stdev = QueryPool.std(dim=0)
         del QueryPool
 
-        dev_triples = 'kinya-ag-retrieval/rw_ag_retrieval_qpntriplets_dev.tsv'
-        test_triples = 'kinya-ag-retrieval/rw_ag_retrieval_qpntriplets_test.tsv'
+        dev_triples = f'{DATA_DIR}/kinya-ag-retrieval/rw_ag_retrieval_qpntriplets_dev.tsv'
+        test_triples = f'{DATA_DIR}/kinya-ag-retrieval/rw_ag_retrieval_qpntriplets_test.tsv'
 
         EVAL_SETS = [('DEV', dev_triples),
                      ('TEST', test_triples)]
@@ -105,4 +107,5 @@ def eval_kinya_col_bert(rank = 0):
         print(f'-------------------------------------------------------------------------------------------------', flush=True)
 
 if __name__ == '__main__':
-    eval_kinya_col_bert(rank = 0)
+    DATA_DIR = sys.argv[1] # '/home/ubuntu/DATA'
+    eval_kinya_col_bert(DATA_DIR, rank = 0)

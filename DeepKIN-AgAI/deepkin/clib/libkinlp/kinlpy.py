@@ -1,9 +1,6 @@
-import time
 from typing import List, Tuple, Union
 
-from cffi import FFI
-
-from deepkin.clib.libkinlp.token_stats import get_all_token_stats
+from deepkin.clib.libkinlp.uds_client import UnixSocketClient
 from deepkin.data.syllabe_vocab import text_to_id_sequence, KINSPEAK_VOCAB_IDX
 
 PAD_ID = 0
@@ -21,115 +18,6 @@ EN_PAD_IDX = 1
 NUM_SPECIAL_TOKENS = 5
 
 MY_PRINTABLE = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~'
-
-TIMING_kinlpy_parse_text = 0.0
-COUNTING_kinlpy_parse_text = 0
-TIMING_kinlpy_delete_sentences = 0.0
-COUNTING_kinlpy_delete_sentences = 0
-
-DIRECT_LIBKINLP_CALL_TIME = 0.0
-DIRECT_LIBKINLP_CALL_COUNT = 0
-
-clib_all_token_stats = None
-
-
-def print_and_reset_libkinlp_timing(lib):
-    global DIRECT_LIBKINLP_CALL_TIME
-    global DIRECT_LIBKINLP_CALL_COUNT
-
-    global TIMING_kinlpy_parse_text
-    global COUNTING_kinlpy_parse_text
-    global TIMING_kinlpy_delete_sentences
-    global COUNTING_kinlpy_delete_sentences
-
-    lib.trigger_server_report()
-
-    print(f'DIRECT_LIBKINLP_CALL_TIME: {DIRECT_LIBKINLP_CALL_TIME:.3f}')
-    print(f'DIRECT_LIBKINLP_CALL_COUNT: {DIRECT_LIBKINLP_CALL_COUNT}')
-
-    print(f'TIMING_kinlpy_parse_text: {TIMING_kinlpy_parse_text:.3f}')
-    print(f'COUNTING_kinlpy_parse_text: {COUNTING_kinlpy_parse_text}')
-
-    print(f'TIMING_kinlpy_delete_sentences: {TIMING_kinlpy_delete_sentences:.3f}')
-    print(f'COUNTING_kinlpy_delete_sentences: {COUNTING_kinlpy_delete_sentences}')
-
-    DIRECT_LIBKINLP_CALL_TIME = 0.0
-    DIRECT_LIBKINLP_CALL_COUNT = 0
-
-    TIMING_kinlpy_parse_text = 0.0
-    COUNTING_kinlpy_parse_text = 0
-    TIMING_kinlpy_delete_sentences = 0.0
-    COUNTING_kinlpy_delete_sentences = 0
-
-
-def build_kinlpy_lib():
-    global clib_all_token_stats
-    if clib_all_token_stats is None:
-        clib_all_token_stats = get_all_token_stats()
-    ffibuilder = FFI()
-
-    ffibuilder.cdef("""
-        typedef struct _kinlpy_parsed_word_t {
-            // POS Info
-            int lm_stem_id;
-            int lm_morph_id;
-            int pos_tag_id;
-    
-            // Morphology
-            int stem_id;
-            int * affix_ids;
-            int * extra_stem_token_ids;
-            int len_affix_ids;
-            int len_extra_stem_token_ids;
-    
-            // Text
-            int uses_bpe;
-            char * surface_form;
-            char * raw_surface_form;
-            int surface_form_has_valid_orthography;
-            int len_surface_form;
-            int len_raw_surface_form;
-            int is_apostrophed;
-            struct _kinlpy_parsed_word_t * next;
-        } kinlpy_parsed_word_t;
-    
-        typedef struct _kinlpy_parsed_sentence_t {
-            kinlpy_parsed_word_t * first_word;
-            kinlpy_parsed_word_t * last_word;
-            int words_len;
-            struct _kinlpy_parsed_sentence_t * next_sent;
-        } kinlpy_parsed_sentence_t;
-    
-        typedef struct _kinlpy_model_params {
-            int tot_num_lm_stems;
-            int tot_num_lm_morphs;
-            int tot_num_pos_tags;
-            int tot_num_stems;
-            int tot_num_affixes;
-        } kinlpy_model_params_t;
-
-        void init_kinlp_socket(const char * config_file, const char * sock_file);
-        void teardown_kinlp_socket(const char * config_file);
-        
-        char * kinlpy_parse_text_via_socket(const char * text, int use_lightweight_parser);
-        char * synth_morpho_token_via_socket(const char * wt_idx, const char * stem, const char * fsa_key, const char * indices_csv);
-        
-        void free_token(char * token);
-        void trigger_server_report(void);
-
-    """)
-
-    ffibuilder.set_source("kinlpy",
-                          """
-                               #include "lib.h"
-                               #include "kinlpy.h"
-                          """,
-                          extra_compile_args=['-fopenmp', '-D use_openmp', '-O3', '-march=native', '-ffast-math',
-                                              '-Wall', '-Werror'],
-                          extra_link_args=['-fopenmp'],
-                          libraries=['kinlp'])  # library name, for the linker
-
-    ffibuilder.compile(verbose=False)
 
 
 class ParsedToken:
@@ -339,59 +227,17 @@ class ParsedFlexSentence:
         return self.num_stems()
 
 
-def parse_text_to_morpho_sentence(ffi, lib, txt: str, use_lightweight_parser=False) -> ParsedFlexSentence:
-    global DIRECT_LIBKINLP_CALL_TIME
-    global DIRECT_LIBKINLP_CALL_COUNT
-    if not any(c in MY_PRINTABLE for c in txt):
-        return ParsedFlexSentence(None, parsed_tokens=[], delimiter='\t')
-    try:
-        start_ts = time.perf_counter()
-        ret_str = lib.kinlpy_parse_text_via_socket(txt.encode('utf-8'), 1 if use_lightweight_parser else 0)
-        DIRECT_LIBKINLP_CALL_TIME += (time.perf_counter() - start_ts)
-        DIRECT_LIBKINLP_CALL_COUNT += 1
-        parsed_sentence_line = ffi.string(ret_str).decode("utf-8")
-        start_ts = time.perf_counter()
-        lib.free_token(ret_str)
-        DIRECT_LIBKINLP_CALL_TIME += (time.perf_counter() - start_ts)
-        DIRECT_LIBKINLP_CALL_COUNT += 1
-        return ParsedFlexSentence(parsed_sentence_line)
-    except Exception as ex:
-        print(f"Error while processing input: '{txt}' ==> {ex}")
-        raise ex
+def parse_text_to_morpho_sentence(uds_client: UnixSocketClient, txt: str) -> ParsedFlexSentence:
+    parsed_sentence_line = ''
+    success = uds_client.send_line('\t' + txt.strip())
+    if success:
+        parsed_sentence_line = uds_client.read_line()
+    return ParsedFlexSentence(parsed_sentence_line)
 
 
-def parse_document_to_morpho_sentence(ffi, lib, text_lines: List[str]) -> ParsedFlexSentence:
+def parse_document_to_morpho_sentence(uds_client: UnixSocketClient, text_lines: List[str]) -> ParsedFlexSentence:
     ret = ParsedFlexSentence(None, parsed_tokens=[], delimiter='\t')
     for txt in text_lines:
-        it = parse_text_to_morpho_sentence(ffi, lib, txt)
+        it = parse_text_to_morpho_sentence(uds_client, txt)
         ret.tokens = ret.tokens + it.tokens
-    return ret
-
-# Need to adjust deepkin config to enable multiple morpho parse candidates
-def parse_text_to_morpho_sentence_multi(ffi, lib, txt: str) -> ParsedSentenceMulti:
-    global DIRECT_LIBKINLP_CALL_TIME
-    global DIRECT_LIBKINLP_CALL_COUNT
-    if not any(c in MY_PRINTABLE for c in txt):
-        return ParsedSentenceMulti("")
-    try:
-        start_ts = time.perf_counter()
-        ret_str = lib.kinlpy_parse_text_via_socket(txt.encode('utf-8'), 0)
-        DIRECT_LIBKINLP_CALL_TIME += (time.perf_counter() - start_ts)
-        DIRECT_LIBKINLP_CALL_COUNT += 1
-        parsed_sentence_line = ffi.string(ret_str).decode("utf-8")
-        start_ts = time.perf_counter()
-        lib.free_token(ret_str)
-        DIRECT_LIBKINLP_CALL_TIME += (time.perf_counter() - start_ts)
-        DIRECT_LIBKINLP_CALL_COUNT += 1
-        return ParsedSentenceMulti(parsed_sentence_line)
-    except Exception as ex:
-        print(f"Error while processing input: '{txt}' ==> {ex}")
-        raise ex
-
-
-def parse_document_to_morpho_sentence_multi(ffi, lib, text_lines: List[str]) -> ParsedSentenceMulti:
-    ret = ParsedSentenceMulti("")
-    for txt in text_lines:
-        it = parse_text_to_morpho_sentence_multi(ffi, lib, txt)
-        ret.multi_tokens = ret.multi_tokens + it.multi_tokens
     return ret

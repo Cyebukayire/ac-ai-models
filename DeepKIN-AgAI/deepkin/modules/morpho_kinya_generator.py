@@ -1,13 +1,12 @@
-from __future__ import print_function, division
+from __future__ import print_function, division, annotations
 
 # Ignore warnings
 import warnings
+warnings.filterwarnings("ignore")
 
 from deepkin.modules.flex_modules import FlexTokenHead
 from deepkin.modules.losses import label_smoothed_nll_loss
 from torch.amp import custom_fwd
-
-warnings.filterwarnings("ignore")
 
 import torch
 import torch.nn as nn
