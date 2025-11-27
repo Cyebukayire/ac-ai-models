@@ -1,4 +1,8 @@
-# e.g. Deploy on RTX 4090
+## e.g. Train on 8 RTX 4090 GPUs
+#  --gpus=8 \
+#  --batch_size=8  \
+#  --accumulation_steps=1024  \
+
 python3 deepkin/train/flex_trainer.py  \
     --model_variant="kinyabert:large" \
     --gpus=8 \

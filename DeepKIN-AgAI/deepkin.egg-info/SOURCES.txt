@@ -5,7 +5,6 @@ deepkin/__init__.py
 deepkin.egg-info/PKG-INFO
 deepkin.egg-info/SOURCES.txt
 deepkin.egg-info/dependency_links.txt
-deepkin.egg-info/requires.txt
 deepkin.egg-info/top_level.txt
 deepkin/clib/__init__.py
 deepkin/clib/libkinlp/__init__.py
@@ -28,12 +27,18 @@ deepkin/inference/__init__.py
 deepkin/inference/qaret_inference.py
 deepkin/models/__init__.py
 deepkin/models/flex_tts.py
-deepkin/models/morpho_bert.py
+deepkin/models/kinyabert.py
 deepkin/models/kinspeak/__init__.py
+deepkin/models/kinspeak/activations.py
+deepkin/models/kinspeak/base_modules.py
+deepkin/models/kinspeak/conformer.py
 deepkin/models/kinspeak/data.py
 deepkin/models/kinspeak/fast_ctc_beam_search.py
 deepkin/models/kinspeak/kinspeak.py
 deepkin/models/kinspeak/kinspeak_ctc_decode.py
+deepkin/models/kinspeak/layer_norm.py
+deepkin/models/kinspeak/position_encoding.py
+deepkin/models/kinspeak/transformers.py
 deepkin/models/kinspeak/utils.py
 deepkin/modules/__init__.py
 deepkin/modules/flex_modules.py
@@ -67,3 +72,5 @@ deepkin/train/flex_trainer.py
 deepkin/utils/__init__.py
 deepkin/utils/arguments.py
 deepkin/utils/misc_functions.py
+monotonic_align/__init__.py
+monotonic_align/setup.py

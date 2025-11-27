@@ -1,4 +1,5 @@
-# Deploy on RTX 4090
+# e.g. Train on 2 RTX 4090 GPUs
+
 python3 deepkin/train/flex_trainer.py  \
     --model_variant="flex_tts:base" \
     --gpus=2 \

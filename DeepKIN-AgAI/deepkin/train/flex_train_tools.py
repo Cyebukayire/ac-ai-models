@@ -1,6 +1,7 @@
 from __future__ import print_function, division
 
 import gc
+import os
 # Ignore warnings
 import warnings
 
@@ -11,8 +12,7 @@ from deepkin.data.morpho_classification_data import create_cls_data, create_tag_
 from deepkin.data.morpho_mlm_data import create_morpho_mlm_dataset
 from deepkin.data.morpho_qa_triple_data import create_morpho_qa_triple_dataset
 from deepkin.models.flex_tts import FlexTTSTrainer
-from deepkin.models.morpho_bert import KinyaBERT, KinyaBERT_Classifier, KinyaBERT_from_pretrained, \
-    KinyaColBERT
+from deepkin.models.kinyabert import KinyaBERT, KinyaBERT_Classifier, KinyaColBERT
 from deepkin.modules.param_init import init_bert_params
 from deepkin.modules.tts_arguments import tts_base_args
 from deepkin.modules.tts_data import TextAudioSpeakerLoader, TextAudioSpeakerCollate, DistributedBucketSampler
@@ -75,7 +75,7 @@ def create_model(dist_rank, device, args: FlexArguments) -> Tuple[Any,Any]:
         tts_args = tts_base_args(list_args=[])
         model = FlexTTSTrainer(tts_args, dist_rank, device)
     elif ('kinyabert_cls' in model_type) or ('kinyabert_tag' in model_type):
-        bert = KinyaBERT_from_pretrained(device, args.pretrained_bert_model_file)
+        bert = KinyaBERT.from_pretrained(device, args.pretrained_bert_model_file)
         model = KinyaBERT_Classifier(args, FlexConfig()).to(device)
         model.cls_head.out_proj.weight.data.normal_(mean=0.0, std=args.ft_proj_init_stdev)
         if model.cls_head.out_proj.bias is not None:
@@ -86,7 +86,7 @@ def create_model(dist_rank, device, args: FlexArguments) -> Tuple[Any,Any]:
         del bert
         gc.collect()
     elif 'kinyabert_qaret' in model_type:
-        bert = KinyaBERT_from_pretrained(device, args.pretrained_bert_model_file)
+        bert = KinyaBERT.from_pretrained(device, args.pretrained_bert_model_file)
         # Model init
         model = KinyaColBERT(args).to(device)
         # Load BERT state
@@ -109,7 +109,7 @@ def next_validation_dataset(dist_rank, global_data, device: torch.device, args: 
         if data_loader is None:
             dataset, data_loader = create_tag_data(args, validation=True)
     elif 'kinyabert' in model_type:
-        if args.dev_parsed_corpus is not None:
+        if (args.dev_parsed_corpus is not None) and os.path.exists(args.dev_parsed_corpus):
             return create_morpho_mlm_dataset(device, args, data_cache, dataset, data_loader, validation=True)
     return data_cache, dataset, data_loader
 

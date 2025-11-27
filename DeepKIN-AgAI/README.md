@@ -1,265 +1,253 @@
 # DeepKIN-AgAI
 
-Kinyarwanda Deep Learning Models and Tools for IVR-based Agricultural Chatbot
+Kinyarwanda Deep Learning Models and Tools for IVR/RAG-based Agricultural Chatbot
 
-## TBD: Full Documentation and Tutorial
+The IVR chatbot is powered by Retrieval-Augmented Generation (RAG), and is designed specifically to serve Kinyarwanda speakers with high accuracy and accessibility.
+By combining the retrieval model with speech processing models, the system seamlessly understands spoken Kinyarwanda, retrieves the most relevant answers from a domain-specific knowledge base, and delivers natural, clear responses in real time.
 
-## Getting started
+## 1. Installing DeepKIN-AgAI
 
-Some of the models depend on a Morphological analyzer/generator for Kinyarwanda.
-In order to use the toolkit, you need to go through the following steps:
-1. Download and install the morphological analyzer/generator
-2. Get a free license for the morphological analyzer/generator
-2. Clone and install DeepKIN toolkit and its dependencies
-3. Run experimental code
+### System Requirements
 
-## Downloading and installing Kinyarwanda morphological analyzer/generator
+- x86_64 CPU
+- 64 GB of System RAM
+- 160 GB of Disk Storage
+- Nvidia GPU
+- Nvidia Drivers
+- Nvidia CUDA Toolkit
+- Docker
+- [NVIDIA Container Toolkit](https://github.com/NVIDIA/nvidia-container-toolkit)
+- Python 3.10+
+- [PyTorch](https://pytorch.org/) 2.0+
+- TorchAudio
+- [MorphoKIN](MorphoKIN.md) (optional) for modeling Kinyarwanda morphology (required by KinyaBERT* models)
 
-The current release (version 0.1.0) of the morphological analyzer is only compatible with Linux x84_64 platform.
-In order to run the morphological analyzer/generator, the system must meet the following minimum requirements:
-- Operating system: Linux x86_64 (amd64), we have tested it with Ubuntu 64-bit, 18.04, 20.04 and 22.04 versions
-- Drive space: 45 GB, (64 GB recommended)
-- System memory (RAM): 40 GB (64 GB recommended)
+This tutorial was tested on [AWS EC2](https://aws.amazon.com/ec2/) *g6e.4xlarge* instance (160 GB disk storage) with "Amazon/Deep Learning OSS Nvidia Driver AMI GPU PyTorch 2.8 (Ubuntu 24.04) 20251101" AMI.
 
-The morphological analyzer is available for download from the following Google Drive link:
-https://drive.google.com/file/d/1Kt9YXhLw_UVMCefcRGworyHUdh-tyQRj/view
-With the link, you can download it directly to your machine.
-In order to download it from a terminal (i.e. on a remote server), you need to use an OAuth token as in the following steps:
-1. Go to OAuth 2.0 Playground https://developers.google.com/oauthplayground/
-2. In the Select the Scope box, paste https://www.googleapis.com/auth/drive.readonly
-3. Click Authorize APIs and then Exchange authorization code for tokens
-4. Copy the Access token
-5. Run the following command in terminal, where ACCESS_TOKEN is the access token copied above:
-```
-curl -H "Authorization: Bearer ACCESS_TOKEN" https://www.googleapis.com/drive/v3/files/1Kt9YXhLw_UVMCefcRGworyHUdh-tyQRj?alt=media -o KINLP.tar.gz
-```
+### 1.1. Installation Steps
 
-The morphological analyzer/generator package installation directory needs to be refered as `KINLP_HOME` environmental variable or be installed in `/opt/KINLP` path as follow:
-```
-gunzip -c KINLP.tar.gz | tar x
-rm KINLP.tar.gz
-sudo ln -s </path/to/downloaded/KINLP> /opt/KINLP
-```
+You can follow the steps below to get the package and its requirements installed:
 
-You can configure the following environmental variables at the shell startup for the morphological analyze to be available; e.g:
-```
-UBUNTU_VERSION=$(lsb_release -r --short)
-export KINLP_HOME=/opt/KINLP
-export PATH=$PATH:$KINLP_HOME:$KINLP_HOME/bin/$UBUNTU_VERSION
-export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$KINLP_HOME/lib/$UBUNTU_VERSION
-```
+1. Ensure system requirements are met, including having [PyTorch](https://pytorch.org/) and compatible TorchAudio installed. It's better to use a Python virtual environment.
+```shell
+# 1. Example of Python installation and virtual environment creation on Ubuntu:
 
-Before using the morphological analyzer/generator, the following packages are needed on a Linux: `gcc g++ make cmake libomp-dev libgsl-dev gsl-bin libgsl-dbg python3-pybind11 pybind11-dev unicode libicu-dev`.
-You can install them on Ubuntu Linux as follows:
-```
-sudo apt update
-sudo apt install -y nano gcc g++ make cmake ninja-build libomp-dev libgsl-dev gsl-bin libgsl-dbg python3-pybind11 pybind11-dev unicode libicu-dev
-```
-This has only been tested on Ubuntu versions 18.04, 20.04 and 22.04.
+sudo apt install python3.12-full python-is-python3 python3.12-venv
+python -m venv flex
+source ~/flex/bin/activate
 
-Currently, the morphological analyzer/generator can be run in three different use-cases:
-#### 1. To check the license validity:
-```
-bash $KINLP_HOME/morphokin.sh license </path/to/LICENSE_FILE.dat>
-```
-#### 2. Sentence analysis via interactive shell:
-```
-bash $KINLP_HOME/morphokin.sh snt </path/to/LICENSE_FILE.dat>
-```
-To exit the snt shell, enter either one of `exit, EXIT, e, E, quit, QUIT, q, Q` commands on the shell.
+# 2. Examples of PyTorch and torchaudio installation:
 
-#### 3. To run morphological analysis and synthesis server on a unix socket; e.g. for Python API calls:
-```
-nohup bash $KINLP_HOME/morphokin.sh rms </path/to/LICENSE_FILE.dat> &>> rms.log &
+# You need to chose the right cuda version to use with PyTorch based on the version of your installed Cuda Toolkit
+# e.g.:$ nvcc --version
+
+# For Cuda 12.8
+pip install torch==2.7.1 torchvision==0.22.1 torchaudio==2.7.1 --index-url https://download.pytorch.org/whl/cu128
+
+# or
+
+# For Cuda 12.9
+pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/cu129
+
 ```
 
-## Getting the free license for the morphological analyzer
-
-The free license is only allowed for academic and non-commercial use of the morphological analyzer/generator. 
-Refer to the [Terms and Conditions](https://docs.google.com/document/d/17elFQbP4lR8uSufsU1NymObH_t2z0dy7sq78fbIMU7M/view) for the morphological analyzer/generator.
-
-To request a free license, fill in the registration form available at::
-https://morphokin.kinlp.com/license/request
-The form requests basic information about the user and their organization.
-Once submitted, you will be required to verify the email address by clicking on the confirmation link sent to your email address.
-
-Once approved, a free license file will be sent to your email address.
-Use the license with morphological analyzer as suggested in the previous section, where `</path/to/LICENSE_FILE.dat>` is the path to the license file on your system.
-
-## Cloning and installing DeepKIN toolkit and its dependencies
-
-**DeepKIN** toolkit implements deep learning models for Kinyarwanda NLP tasks such as text classification, language modeling, named entity recognition and others. The toolkit depends on the Kinyarwanda morphological analyzer/generator at its core.
-It also depends on PyTorch and other python packages.
-We recommend to use [Anaconda](https://www.anaconda.com/download) distribution with virtual environment as we have tested with it.
-You will also need a CUDA-enabled GPU with at least 12 GB or GPU RAM. Nvidia GPUs with Tensor Cores are most recommended.
-
-Go through the following commands for the installation of the toolkit and its dependencies:
+2. Clone DeepKIN-AgAI from GitHub
 ```shell
 
-# 1. Install Python
+git clone git@github.com:c4ir-rw/ac-ai-models.git
 
-sudo apt install python3.12-venv
+cd ac-ai-models/DeepKIN-AgAI/
 
-# 2. Create virtual environment
+```
 
-python -m venv mycustomenv
+3. Install dependencies
+```shell
 
-source ~/mycustomenv/bin/activate
+pip install -r requirements.txt
 
-# 3. Install PyTorch
+```
 
-pip3 install torch torchvision
+4. Install these additional packages to improve performance: *flash-attn*, *mamba-ssm*, *causal-conv1d* and *[Nvidia Apex](https://github.com/NVIDIA/apex)*
 
-pip install torchcodec
-pip install torchaudio
+```shell
 
-# 4. Install various dependencies
+MAX_JOBS=8 pip install flash-attn --no-build-isolation
 
-pip install Cython
-pip install distro
-pip install progressbar2
-pip install seqeval
-pip install youtokentome
-pip install sacremoses
-pip install fastBPE
-pip install packaging
-pip install mutagen
-pip install pandas
-pip install acoustics
-pip install typed-argument-parser
-pip install demoji
-pip install librosa
-pip install pyinflect
-pip install webcolors
-pip install typo
-pip install colorama
-pip install minineedle
-pip install ragatouille
-pip install transformers tokenizers
-pip install g2pk2
-pip install cn2an
-pip install inflect
-pip install eng_to_ipa
-pip install opencc
-pip install unidecode
-pip install phonemizer
-pip install pyopenjtalk
-pip install ko_pron
-pip install pypinyin
-pip install jieba
-pip install indic_transliteration
-pip install num_thai
-pip install tensorboardX
-pip install torchmetrics
-pip install flash-attn --no-build-isolation
-pip install causal-conv1d>=1.4.0
-pip install mamba-ssm[causal-conv1d]
-pip install Cython
-pip install distro
-pip install progressbar2
-pip install seqeval
-pip install youtokentome
-pip install sacremoses
-pip install fastBPE
-pip install packaging
-pip install mutagen
-pip install pandas
-pip install acoustics
-pip install typed-argument-parser
-pip install demoji
-pip install librosa
-pip install pyinflect
-pip install webcolors
-pip install typo
-pip install colorama
-pip install minineedle
-pip install ragatouille
-pip install transformers tokenizers
-pip install g2pk2
-pip install cn2an
-pip install inflect
-pip install eng_to_ipa
-pip install opencc
-pip install unidecode
-pip install phonemizer
-pip install pyopenjtalk
-pip install ko_pron
-pip install pypinyin
-pip install jieba
-pip install indic_transliteration
-pip install num_thai
-pip install tensorboardX
-pip install torchmetrics
-pip install Cython
-pip install fastBPE
-sudo apt-get install python3-dev
-
-pip install packaging
-
-# 5. Install flash-attention and mamba-ssm packages
-
-pip install flash-attn --no-build-isolation
-pip install psutil
-pip install flash-attn --no-build-isolation
-pip install causal-conv1d>=1.4.0
-pip install mamba-ssm[causal-conv1d]
-
-# 6. Build and install Nvidia apex
+MAX_JOBS=8 pip install mamba-ssm[causal-conv1d] --no-build-isolation
 
 git clone https://github.com/NVIDIA/apex
 cd apex/
+
 NVCC_APPEND_FLAGS="--threads 8" APEX_PARALLEL_BUILD=8 APEX_CPP_EXT=1 APEX_CUDA_EXT=1 pip install -v --no-build-isolation .
 
-# 7. Install fairseq
+```
 
-git clone https://github.com/pytorch/fairseq
-cd fairseq
-pip install --no-deps -e ./
+5. Install *deepkin* and *monotonic_align* packages inside DeepKIN-AgAI
+```shell
 
-# 8. Install DeepKIN-AgAI package
-cd DeepKIN-AgAI
+cd DeepKIN-AgAI/
 
-pip install --no-deps -e ./
+pip install -e ./
+
+
+cd DeepKIN-AgAI/monotonic_align/
+
+python setup.py build_ext --inplace
+
+pip install ./ --no-build-isolation
 
 ```
 
-## Citations
+## 2. Using DeepKIN-AgAI
 
+### 2.1 Training
 
-```
-@inproceedings{nzeyimana-2020-morphological,
-    title = "Morphological disambiguation from stemming data",
-    author = "Nzeyimana, Antoine",
-    booktitle = "Proceedings of the 28th International Conference on Computational Linguistics",
-    month = dec,
-    year = "2020",
-    address = "Barcelona, Spain (Online)",
-    publisher = "International Committee on Computational Linguistics",
-    url = "https://aclanthology.org/2020.coling-main.409",
-    doi = "10.18653/v1/2020.coling-main.409",
-    pages = "4649--4660",
-}
+#### 2.1.1. Training a KinyaBERT model from scratch
 
-@inproceedings{nzeyimana-niyongabo-rubungo-2022-kinyabert,
-    title = "{K}inya{BERT}: a Morphology-aware {K}inyarwanda Language Model",
-    author = "Nzeyimana, Antoine  and
-      Niyongabo Rubungo, Andre",
-    booktitle = "Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers)",
-    month = may,
-    year = "2022",
-    address = "Dublin, Ireland",
-    publisher = "Association for Computational Linguistics",
-    url = "https://aclanthology.org/2022.acl-long.367",
-    doi = "10.18653/v1/2022.acl-long.367",
-    pages = "5347--5363",
-}
+1. Prepare a Kinyarwanda text corpus file containing multiple documents by placing one sentence per line and an empty line between documents. Use the provided [sample_corpus.txt](scripts/scratch/sample_corpus.txt) file as a reference.
+2. Parse the text corpus with MorphoKIN. Adjust the number of parallel threads based on your CPU core count using *--num_threads* option.
+```shell
 
-@article{nzeyimana2025kinyacolbert,
-  title={KinyaColBERT: A Lexically Grounded Retrieval Model for Low-Resource Retrieval-Augmented Generation},
-  author={Nzeyimana, Antoine and Rubungo, Andre Niyongabo},
-  journal={arXiv preprint arXiv:2507.03241},
-  year={2025}
-}
+# Ensure you have the free license file, e.g.:
+# cp KINLP_LICENSE_FILE.dat /home/ubuntu/MORPHODATA/licenses/
+
+# Have the corpus text file, e.g.:
+mkdir -p /home/ubuntu/DATA
+cp DeepKIN-AgAI/scripts/scratch/sample_corpus.txt /home/ubuntu/DATA/
+
+# Run MorphoKIN with docker (interactive mode)
+docker run --rm -v /home/ubuntu/MORPHODATA:/MORPHODATA -v /home/ubuntu/DATA:/DATA --gpus all -it morphokin:latest bash
+
+morphokin --morphokin_working_dir /MORPHODATA \
+ --morphokin_config_file /MORPHODATA/data/analysis_config_file.conf \
+ --task PTF --num_threads 14 \
+ --kinlp_license /MORPHODATA/licenses/KINLP_LICENSE_FILE.dat \
+ --ca_roots_pem_file /MORPHODATA/data/roots.pem \
+ --input_file /DATA/sample_corpus.txt \
+ --output_file /DATA/preparsed_sample_corpus.txt
+
+# Quit docker
+exit
 
 ```
+The sentences in the generated file ("pre-parsed" by MorphoKIN) is not in original order (this is done for faster parallel processing);
+you need to re-arrange the sentences by running the provided "post-ptf" python script.
+```shell
 
+python DeepKIN-AgAI/scripts/scratch/post_ptf.py /home/ubuntu/DATA/preparsed_sample_corpus.txt  /home/ubuntu/DATA/parsed_sample_corpus.txt
+
+```
+
+3. Run the provided KinyaBERT (e.g. base) training script.
+Adjust your batch size and accumulation steps based on your available GPU VRAM to give a global batch size of ~ 8K documents.
+The example configuration below (*--batch_size=48 --accumulation_steps=170*) is for a GPU with 48 GB of VRAM. 
+The script allow for multi-gpu training (*--gpu=N*) using Distributed Data Parellelism (DDP i.e. *--use_ddp=True*).
+When training on multiple GPUs, ensure *--accumulation_steps* is divisible by the number of GPUs.
+```shell
+
+# Base architecture: 107M parameter KinyaBERT Model: DeepKIN-AgAI/scripts/train/kinyabert/kinyabert_base_ddp.sh
+# Large architecture: 365M parameter KinyaBERT Model: DeepKIN-AgAI/scripts/train/kinyabert/kinyabert_large_ddp.sh
+
+# Example:
+
+python3 DeepKIN-AgAI/deepkin/train/flex_trainer.py  \
+    --model_variant="kinyabert:base" \
+    --gpus=1 \
+    --batch_size=48  \
+    --accumulation_steps=170  \
+    --dataloader_num_workers=2  \
+    --dataloader_persistent_workers=True  \
+    --dataloader_pin_memory=True  \
+    --use_ddp=True \
+    --use_mtl_optimizer=False \
+    --warmup_iter=2400 \
+    --peak_lr=6e-4  \
+    --lr_decay_style="linear" \
+    --num_iters=50000  \
+    --train_parsed_corpus="/home/ubuntu/DATA/parsed_sample_corpus.txt"  \
+    --number_of_load_batches=40960  \
+    --dataset_max_seq_len=512  \
+    --use_iterable_dataset=True  \
+    --max_mlm_documents=5  \
+    --max_dataset_chunk_size=60000 \
+    --train_log_steps=1  \
+    --checkpoint_steps=100 \
+    --validation_steps=1000 \
+    --load_saved_model=True  \
+    --model_save_path="/home/ubuntu/DATA/kinyabert_base_ddp_new.pt"
+
+```
+
+#### 2.1.2. Fine-tuning a pretrained KinyaBERT model into a KinyaColBERT retrieval model
+```shell
+
+# TBD
+
+```
+
+
+#### 2.1.3. Training a RAGatouille-based ColBERT retrieval model (No morphological model needed)
+```shell
+
+# TBD
+
+```
+
+#### 2.1.4. Training a Text-to-Speech model from scratch
+```shell
+
+# TBD
+
+```
+
+### 2.2 Inference
+
+#### 2.2.1. Evaluating a trained KinyaColBERT retrieval model
+```shell
+
+# TBD
+
+```
+
+
+#### 2.2.2. Evaluating a trained RAGatouille-based ColBERT retrieval model
+```shell
+
+# TBD
+
+```
+
+#### 2.2.3. Evaluating a trained Text-to-Speech model
+```shell
+
+# TBD
+
+```
+
+#### 2.2.4. Running an API server for KinyaColBERT retrieval
+```shell
+
+# TBD
+
+```
+
+#### 2.2.5. Running an API server for Text-to-Speech
+```shell
+
+# TBD
+
+```
+
+
+
+## References
+
+[1] Antoine Nzeyimana. 2020. Morphological disambiguation from stemming data. In Proceedings of the 28th International Conference on Computational Linguistics, pages 4649–4660, Barcelona, Spain (Online). International Committee on Computational Linguistics.
+
+[2] Antoine Nzeyimana and Andre Niyongabo Rubungo. 2022. KinyaBERT: a Morphology-aware Kinyarwanda Language Model. In Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), pages 5347–5363, Dublin, Ireland. Association for Computational Linguistics.
+
+[3] Antoine Nzeyimana. 2023. KINLP at SemEval-2023 Task 12: Kinyarwanda Tweet Sentiment Analysis. In Proceedings of the 17th International Workshop on Semantic Evaluation (SemEval-2023), pages 718–723, Toronto, Canada. Association for Computational Linguistics.
+
+[4] Antoine Nzeyimana. 2024. Low-resource neural machine translation with morphological modeling. In Findings of the Association for Computational Linguistics: NAACL 2024, pages 182–195, Mexico City, Mexico. Association for Computational Linguistics.
+
+[5] Antoine Nzeyimana, and Andre Niyongabo Rubungo. 2025. KinyaColBERT: A Lexically Grounded Retrieval Model for Low-Resource Retrieval-Augmented Generation. arXiv preprint arXiv:2507.03241.

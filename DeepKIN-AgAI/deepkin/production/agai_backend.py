@@ -13,7 +13,7 @@ import torch.nn.functional as F
 from deepkin.clib.libkinlp.kinlpy import parse_text_to_morpho_sentence, ParsedFlexSentence
 from deepkin.data.morpho_qa_triple_data import DOCUMENT_TYPE_ID, QUESTION_TYPE_ID
 from deepkin.inference.qaret_inference import init_qaret_inference_setup
-from deepkin.models.morpho_bert import KinyaColBERT
+from deepkin.models.kinyabert import KinyaColBERT
 from deepkin.utils.misc_functions import time_now, read_lines
 
 warnings.filterwarnings("ignore")

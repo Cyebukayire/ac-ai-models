@@ -1,7 +1,6 @@
 import time
 from typing import List, Tuple, Union
 
-import youtokentome as yttm
 from cffi import FFI
 
 from deepkin.clib.libkinlp.token_stats import get_all_token_stats
@@ -261,16 +260,6 @@ class ParsedFlexToken:
             if len(self.tones) > 0:
                 ret += (' ' + (','.join([f'{a}:{b}:{c}' for a, b, c in self.tones])))
         return ret
-
-    def get_surface_forms(self, bpe: yttm.BPE):
-        if len(self.id_extra_tokens) > 0:
-            bpe_tkn_lists: List[List[str]] = bpe.encode([self.raw_surface_form],
-                                                        output_type=yttm.OutputType.SUBWORD, bos=False, eos=False,
-                                                        reverse=False,
-                                                        dropout_prob=0)  # [0]
-            return [(k if (k[0] == '▁') else ('@@' + k)) for k in bpe_tkn_lists[0]]
-        else:
-            return [self.raw_surface_form]
 
 
 class ParsedAltToken:

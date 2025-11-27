@@ -1,9 +1,11 @@
-# Deploy on RTX 4090
+# e.g. Train on 10 RTX 4090 GPUs
+#    --gpus=10 \
 #    --batch_size=6  \
 #    --accumulation_steps=20  \
 #    --use_ddp=True \
 
-# Deploy on DGXH200
+# e.g. Train on 4 H200 GPUs
+#    --gpus=4 \
 #    --batch_size=32  \
 #    --accumulation_steps=4  \
 #    --use_ddp=False \

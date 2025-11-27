@@ -4,7 +4,7 @@ import torch.nn.functional as F
 
 from deepkin.clib.libkinlp.kinlpy import ParsedFlexSentence
 from deepkin.data.morpho_qa_triple_data import DOCUMENT_TYPE_ID, QUESTION_TYPE_ID
-from deepkin.models.kinyabert import KinyaColBERT_from_pretrained
+from deepkin.models.kinyabert import KinyaColBERT
 from deepkin.utils.misc_functions import read_lines
 
 def eval_kinya_col_bert(rank = 0):
@@ -23,7 +23,7 @@ def eval_kinya_col_bert(rank = 0):
 
     device = torch.device('cuda:%d' % rank)
 
-    model, args = KinyaColBERT_from_pretrained(device, pretrained_model_file, ret_args=True)
+    model, args = KinyaColBERT.from_pretrained(device, pretrained_model_file, ret_args=True)
     model.float()
     model.eval()
 

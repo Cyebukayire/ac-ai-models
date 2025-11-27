@@ -5,7 +5,7 @@ from typing import Tuple
 import torch
 
 from deepkin.clib.libkinlp.kinlpy import build_kinlpy_lib
-from deepkin.models.morpho_bert import KinyaColBERT_from_pretrained
+from deepkin.models.kinyabert import KinyaColBERT
 
 
 def init_qaret_inference_setup(pretrained_colbert_model_file: str,
@@ -19,7 +19,7 @@ def init_qaret_inference_setup(pretrained_colbert_model_file: str,
     device = torch.device('cuda:%d' % rank)
     torch.cuda.set_device(rank)
 
-    ColBERT = KinyaColBERT_from_pretrained(device, pretrained_colbert_model_file)
+    ColBERT = KinyaColBERT.from_pretrained(device, pretrained_colbert_model_file)
     ColBERT.float()
     ColBERT.eval()
 

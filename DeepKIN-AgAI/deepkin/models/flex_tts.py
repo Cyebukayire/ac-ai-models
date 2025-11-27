@@ -1,3 +1,5 @@
+from __future__ import print_function, division, annotations
+
 from typing import Tuple, Mapping, Any, List, Iterator
 
 import torch
@@ -137,7 +139,7 @@ class FlexTTSTrainer(object):
         tts_args = TTSArguments().from_dict(state_dict['tts_args'])
         model = FlexTTSTrainer(tts_args, 0, torch.device('cpu'), epoch_str=epoch_str)
         model.load_state_dict(state_dict)
-        print(time_now(), 'FlexTTS train steps:', f'{(steps/1000):.0f}K')
+        print(time_now(), 'FlexTTS train steps:', f'{(steps/1000):,.0f}K')
         print(time_now(), 'Loading FlexTTS from', filename, 'done!')
         return model
 
@@ -222,8 +224,21 @@ class FlexKinyaTTS(nn.Module):
         x = torch.LongTensor(id_seq).unsqueeze(0)
         x_lengths = torch.LongTensor([x.size(1)])
         sid = torch.LongTensor([sid])
-        audio_stream = self.flex_tts.infer(x, x_lengths, sid, noise_scale=0.667, length_scale=(1.0/speed))[0][0].data.float()
+        device = next(self.parameters()).device
+        audio_stream = self.flex_tts.infer(x.to(device), x_lengths.to(device), sid.to(device), noise_scale=0.667, length_scale=(1.0/speed))[0][0].cpu().data.float()
         return audio_stream
+
+    @staticmethod
+    def from_pretrained(device: torch.device, pretrained_model_file: str) -> FlexKinyaTTS:
+        trained_model = FlexTTSTrainer.from_pretrained(pretrained_model_file)
+        trained_model.flex_tts.eval()
+        tts = FlexKinyaTTS(trained_model.flex_tts).to(device)
+        tts.flex_tts.eval()
+        tts.flex_tts.zero_grad()
+        tts.flex_tts.remove_weight_norm()
+        del tts.flex_tts.enc_q
+        return tts
+
 
 def compare_params(name, a, b):
     sa,sb = sum(p.numel() for p in a.parameters()),  sum(p.numel() for p in b.parameters())
