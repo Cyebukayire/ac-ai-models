@@ -1,11 +1,32 @@
 # DeepKIN-AgAI
 
-Kinyarwanda Deep Learning Models and Tools for IVR/RAG-based Agricultural Chatbot
+Kinyarwanda Models and Tools for IVR/RAG-based Agricultural Chatbot
 
 The IVR chatbot is powered by Retrieval-Augmented Generation (RAG), and is designed specifically to serve Kinyarwanda speakers with high accuracy and accessibility.
 By combining the retrieval model with speech processing models, the system seamlessly understands spoken Kinyarwanda, retrieves the most relevant answers from a domain-specific knowledge base, and delivers natural, clear responses in real time.
 
-## 1. Installing DeepKIN-AgAI
+---
+
+## Contents
+
+* [1 Installing DeepKIN-AgAI](#1-installing-deepkin-agai)
+  * [System Requirements](#system-requirements)
+  * [1.1 Installation Steps](#11-installation-steps)
+* [2 Using DeepKIN-AgAI](#2-using-deepkin-agai)
+  * [2.1 Training](#21-training)
+    * [2.1.1 Pre-Training a KinyaBERT model from scratch](#211-pre-training-a-kinyabert-model-from-scratch)
+    * [2.1.2 Fine-tuning a pretrained KinyaBERT model into a KinyaColBERT retrieval model](#212-fine-tuning-a-pretrained-kinyabert-model-into-a-kinyacolbert-retrieval-model)
+    * [2.1.3 Training a multi-speaker Text-to-Speech model from scratch](#213-training-a-multi-speaker-text-to-speech-model-from-scratch)
+  * [2.2 Inference](#22-inference)
+    * [2.2.1 Evaluating a trained KinyaColBERT retrieval model](#221-evaluating-a-trained-kinyacolbert-retrieval-model)
+    * [2.2.2 Evaluating a trained Text-to-Speech model](#222-evaluating-a-trained-text-to-speech-model)
+    * [2.2.3 Running an API server for KinyaColBERT Ag retrieval](#223-running-an-api-server-for-kinyacolbert-ag-retrieval)
+    * [2.2.4 Running an API server for Text-to-Speech](#224-running-an-api-server-for-text-to-speech)
+* [References](#references)
+
+---
+
+## 1 Installing DeepKIN-AgAI
 
 ### System Requirements
 
@@ -20,11 +41,11 @@ By combining the retrieval model with speech processing models, the system seaml
 - Python 3.10+
 - [PyTorch](https://pytorch.org/) 2.0+
 - TorchAudio
-- [MorphoKIN](MorphoKIN.md) (optional) for modeling Kinyarwanda morphology (required by KinyaBERT* models)
+- [MorphoKIN](https://github.com/anzeyimana/morphokin) (optional) for modeling Kinyarwanda morphology (required by KinyaBERT* models)
 
 This tutorial was tested on [AWS EC2](https://aws.amazon.com/ec2/) *g6e.4xlarge* instance (160 GB disk storage) with "Amazon/Deep Learning OSS Nvidia Driver AMI GPU PyTorch 2.8 (Ubuntu 24.04) 20251101" AMI.
 
-### 1.1. Installation Steps
+### 1.1 Installation Steps
 
 You can follow the steps below to get the package and its requirements installed:
 
@@ -98,14 +119,16 @@ pip install ./ --no-build-isolation
 
 ```
 
-## 2. Using DeepKIN-AgAI
+---
+
+## 2 Using DeepKIN-AgAI
 
 ### 2.1 Training
 
-#### 2.1.1. Pre-Training a KinyaBERT model from scratch
+#### 2.1.1 Pre-Training a KinyaBERT model from scratch
 
 1. Prepare a Kinyarwanda text corpus file containing multiple documents by placing one sentence per line and an empty line between documents. Use the provided [sample_corpus.txt](scripts/scratch/sample_corpus.txt) file as a reference.
-2. Parse the text corpus with [MorphoKIN](MorphoKIN.md). Adjust the number of parallel threads based on your CPU core count using *--num_threads* option.
+2. Parse the text corpus with [MorphoKIN](https://github.com/anzeyimana/morphokin). Adjust the number of parallel threads based on your CPU core count using *--num_threads* option.
 ```shell
 
 # Ensure you have the free license file, e.g.:
@@ -130,7 +153,7 @@ morphokin --morphokin_working_dir /MORPHODATA \
 exit
 
 ```
-The sentences in the generated file ("pre-parsed" by [MorphoKIN](MorphoKIN.md)) is not in original order (this is done for faster parallel processing);
+The sentences in the generated file ("pre-parsed" by [MorphoKIN](https://github.com/anzeyimana/morphokin)) is not in original order (this is done for faster parallel processing);
 you need to re-arrange the sentences by running the provided "post-ptf" python script.
 ```shell
 
@@ -178,11 +201,11 @@ python3 DeepKIN-AgAI/deepkin/train/flex_trainer.py  \
 
 ```
 
-#### 2.1.2. Fine-tuning a pretrained KinyaBERT model into a KinyaColBERT retrieval model
+#### 2.1.2 Fine-tuning a pretrained KinyaBERT model into a KinyaColBERT retrieval model
 
-The following example uses a pre-trained KinyaBERT (i.e. Hugging Face: "C4IR-RW/kinyabert") base model (107M paremeters).
+The following example uses a pre-trained KinyaBERT (i.e. ["C4IR-RW/kinyabert"](https://huggingface.co/C4IR-RW/kinyabert) on Hugging Face) base model (107M paremeters).
 
-The training data for agricultural retrieval (i.e. Hugging Face: "C4IR-RW/kinya-ag-retrieval"") has been morphologically parsed already, but for another domain, [MorphoKIN](MorphoKIN.md) parsing will be performed first.
+The training data for agricultural retrieval (i.e. ["C4IR-RW/kinya-ag-retrieval"](https://huggingface.co/datasets/C4IR-RW/kinya-ag-retrieval) on Hugging Face) has been morphologically parsed already, but for other datasets, [MorphoKIN](https://github.com/anzeyimana/morphokin) parsing will be performed first.
 
 ```shell
 
@@ -228,9 +251,9 @@ python3 DeepKIN-AgAI/deepkin/train/flex_trainer.py  \
 
 ```
 
-#### 2.1.3. Training a multi-speaker Text-to-Speech model from scratch
+#### 2.1.3 Training a multi-speaker Text-to-Speech model from scratch
 
-1. First download "C4IR-RW/kinya-ag-tts" dataset from Hugging face and place it in a local directory, e.g. */home/ubuntu/DATA*
+1. First download ["C4IR-RW/kinya-ag-tts"](https://huggingface.co/datasets/C4IR-RW/kinya-ag-tts) dataset from Hugging face and place it in a local directory, e.g. */home/ubuntu/DATA*
 
 2. The run the processing script to normalize the text and generate a training set data file.
 The training data file is pipe-separated and each line contains the following: AUDIO_FILE|SPEAKER_ID|NORMALIZED_TEXT
@@ -272,7 +295,7 @@ python3 DeepKIN-AgAI/deepkin/train/flex_trainer.py  \
 
 ### 2.2 Inference
 
-#### 2.2.1. Evaluating a trained KinyaColBERT retrieval model
+#### 2.2.1 Evaluating a trained KinyaColBERT retrieval model
 ```shell
 
 python3 DeepKIN-AgAI/scripts/eval/colbert/agai_eval_kinya_col_bert_mrr.py "/home/ubuntu/DATA"
@@ -280,23 +303,23 @@ python3 DeepKIN-AgAI/scripts/eval/colbert/agai_eval_kinya_col_bert_mrr.py "/home
 ```
 
 
-#### 2.2.2. Evaluating a trained Text-to-Speech model
+#### 2.2.2 Evaluating a trained Text-to-Speech model
 ```shell
 
 python3 DeepKIN-AgAI/scripts/eval/tts/eval_flex_tts.py "/home/ubuntu/DATA"
 
 ```
 
-#### 2.2.3. Running an API server for KinyaColBERT Ag retrieval
+#### 2.2.3 Running an API server for KinyaColBERT Ag retrieval
 
-1. First, run [MorphoKIN](MorphoKIN.md) server on Unix domain socket:
+1. First, run [MorphoKIN](https://github.com/anzeyimana/morphokin) server on Unix domain socket:
 
 ```shell
 
 # Launch a daemon container
 
 docker run -d -v /home/ubuntu/MORPHODATA:/MORPHODATA \
-  --gpus all -it morphokin:latest morphokin \
+  --gpus all morphokin:latest morphokin \
   --morphokin_working_dir /MORPHODATA \
   --morphokin_config_file /MORPHODATA/data/analysis_config_file.conf  \
   --task RMS \
@@ -329,7 +352,7 @@ python3 DeepKIN-AgAI/deepkin/production/agai_backend.py
 
 ```
 
-#### 2.2.4. Running an API server for Text-to-Speech
+#### 2.2.4 Running an API server for Text-to-Speech
 
 ```shell
 
@@ -337,7 +360,7 @@ python3 DeepKIN-AgAI/deepkin/production/tts_backend.py
 
 ```
 
-
+---
 
 ## References
 

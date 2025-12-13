@@ -11,7 +11,7 @@ if __name__ == '__main__':
     DATA_DIR = sys.argv[1] #'/home/ubuntu/DATA'
 
     rank = 0
-    device = torch.device('cuda:%d' % rank)
+    device = torch.device('cuda:%d' % rank) if torch.cuda.is_available() else torch.device('cpu')
 
     kinya_tts = FlexKinyaTTS.from_pretrained(device, f'{DATA_DIR}/kinya_flex_tts_base_trained.pt')
     kinya_tts.eval()
