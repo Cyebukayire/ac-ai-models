@@ -35,8 +35,6 @@ To support IVR (voice-based) interactions, the repository includes **Flex-TTS**,
 
 In addition to the neural models, the repository leverages **MorphoKIN**, a critical tool for morphological disambiguation and parsing. This ensures that the models correctly interpret Kinyarwanda's prefix and suffix systems before the data is processed by the transformers.
 
-Would you like me to help you draft a specific "Model Card" summary for any of these individual models to include in your documentation?
-
 ## License
 
 This code and the models are released unter the [CC BY 4.0 License](https://creativecommons.org/licenses/by/4.0/)
