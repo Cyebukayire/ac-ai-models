@@ -12,14 +12,14 @@ The **DeepKIN-AgAI** repository provides a specialized suite of models designed 
 
 The repository contains three primary model categories:
 
-## KinyaBERT (Language Understanding)**
+## KinyaBERT (Language Understanding)
 
 At the heart of the system is **KinyaBERT**, a morphology-aware language model. Unlike standard BERT models, KinyaBERT is specifically optimized for the complex grammatical structure of Kinyarwanda. It serves as the "brain" for understanding text and is available in two sizes:
 
 * **Base:** A 107M parameter model for efficient processing.  
 * **Large:** A 365M parameter model for higher accuracy and deeper linguistic nuance.
 
-## KinyaColBERT (Retrieval)**
+## KinyaColBERT (Retrieval)
 
 This is a fine-tuned version of KinyaBERT using the **ColBERT** (Contextualized Late Interaction over BERT) architecture. It is designed for **Dense Retrieval**, allowing the chatbot to:
 
@@ -27,11 +27,11 @@ This is a fine-tuned version of KinyaBERT using the **ColBERT** (Contextualized 
 * Match user queries to the most relevant technical documents with high precision.  
 * Utilize lexically grounded embeddings to handle low-resource language constraints effectively.
 
-## Flex-TTS (Speech Synthesis)**
+## Flex-TTS (Speech Synthesis)
 
 To support IVR (voice-based) interactions, the repository includes **Flex-TTS**, a multi-speaker Text-to-Speech engine. This model converts the retrieved text answers into natural-sounding Kinyarwanda speech, making agricultural advice accessible to users who prefer or require audio communication over text.
 
-## **Supporting Tools**
+## Supporting Tools
 
 In addition to the neural models, the repository leverages **MorphoKIN**, a critical tool for morphological disambiguation and parsing. This ensures that the models correctly interpret Kinyarwanda's prefix and suffix systems before the data is processed by the transformers.
 
