@@ -1,0 +1,50 @@
+host: h100server  job: 7819  env: kinya-deepkin  start: Mon Oct  5 16:40:44 EDT 2026
+Mon Oct  5 16:40:44 2026       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 595.71.05              Driver Version: 595.71.05      CUDA Version: 13.2     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA H100 80GB HBM3          Off |   00000000:3F:00.0 Off |                    0 |
+| N/A   32C    P0             70W /  700W |       0MiB /  81559MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+torch 2.7.1+cu128 cuda True
+Got: 19537 queries, 984 passages
+Loading pre-trained KinyaColBERT model from /local/scratch/pcyebuk/DATA/kinya_colbert_large_rw_ag_retrieval_finetuned_512D.pt ...
+Pre-training steps: 14,853
+kinya_colbert_large Embedding passages ...
+kinya_colbert_large Embedding queries ...
+-------------------------------------------------------------------------------------------------
+@DEV Final kinya_colbert_large-512 kinya-ag-retrieval DEV Set Top#1 Accuracy:  80.1% (157 / 196)
+@DEV Final kinya_colbert_large-512 kinya-ag-retrieval DEV Set Top#5 Accuracy:  93.4% (183 / 196)
+@DEV Final kinya_colbert_large-512 kinya-ag-retrieval DEV Set Top#10 Accuracy:  94.9% (186 / 196)
+@DEV Final kinya_colbert_large-512 kinya-ag-retrieval DEV Set Top#20 Accuracy:  96.4% (189 / 196)
+@DEV Final kinya_colbert_large-512 kinya-ag-retrieval DEV Set Top#30 Accuracy:  97.4% (191 / 196)
+@DEV Final kinya_colbert_large-512 kinya-ag-retrieval DEV Set MRR@5:  85.2% (167 / 196)
+@DEV Final kinya_colbert_large-512 kinya-ag-retrieval DEV Set MRR@10:  85.4% (167 / 196)
+@DEV Final kinya_colbert_large-512 kinya-ag-retrieval DEV Set MRR@20:  85.5% (168 / 196)
+@DEV Final kinya_colbert_large-512 kinya-ag-retrieval DEV Set MRR@30:  85.5% (168 / 196)
+-------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------
+@TEST Final kinya_colbert_large-512 kinya-ag-retrieval TEST Set Top#1 Accuracy:  84.2% (277 / 329)
+@TEST Final kinya_colbert_large-512 kinya-ag-retrieval TEST Set Top#5 Accuracy:  96.4% (317 / 329)
+@TEST Final kinya_colbert_large-512 kinya-ag-retrieval TEST Set Top#10 Accuracy:  97.9% (322 / 329)
+@TEST Final kinya_colbert_large-512 kinya-ag-retrieval TEST Set Top#20 Accuracy:  98.8% (325 / 329)
+@TEST Final kinya_colbert_large-512 kinya-ag-retrieval TEST Set Top#30 Accuracy:  99.1% (326 / 329)
+@TEST Final kinya_colbert_large-512 kinya-ag-retrieval TEST Set MRR@5:  88.8% (292 / 329)
+@TEST Final kinya_colbert_large-512 kinya-ag-retrieval TEST Set MRR@10:  89.0% (293 / 329)
+@TEST Final kinya_colbert_large-512 kinya-ag-retrieval TEST Set MRR@20:  89.0% (293 / 329)
+@TEST Final kinya_colbert_large-512 kinya-ag-retrieval TEST Set MRR@30:  89.0% (293 / 329)
+-------------------------------------------------------------------------------------------------
+end: Mon Oct  5 16:45:10 EDT 2026

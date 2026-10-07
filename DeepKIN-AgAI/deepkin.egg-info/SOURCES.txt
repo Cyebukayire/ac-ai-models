@@ -12,6 +12,7 @@ deepkin/clib/libkinlp/kinlp_model.py
 deepkin/clib/libkinlp/kinlpy.py
 deepkin/clib/libkinlp/language_data.py
 deepkin/clib/libkinlp/token_stats.py
+deepkin/clib/libkinlp/uds_client.py
 deepkin/data/__init__.py
 deepkin/data/base_data.py
 deepkin/data/kinya_norm.py
@@ -28,18 +29,6 @@ deepkin/inference/qaret_inference.py
 deepkin/models/__init__.py
 deepkin/models/flex_tts.py
 deepkin/models/kinyabert.py
-deepkin/models/kinspeak/__init__.py
-deepkin/models/kinspeak/activations.py
-deepkin/models/kinspeak/base_modules.py
-deepkin/models/kinspeak/conformer.py
-deepkin/models/kinspeak/data.py
-deepkin/models/kinspeak/fast_ctc_beam_search.py
-deepkin/models/kinspeak/kinspeak.py
-deepkin/models/kinspeak/kinspeak_ctc_decode.py
-deepkin/models/kinspeak/layer_norm.py
-deepkin/models/kinspeak/position_encoding.py
-deepkin/models/kinspeak/transformers.py
-deepkin/models/kinspeak/utils.py
 deepkin/modules/__init__.py
 deepkin/modules/flex_modules.py
 deepkin/modules/flex_transformers.py
@@ -66,6 +55,7 @@ deepkin/optim/lamb.py
 deepkin/optim/learning_rates.py
 deepkin/production/__init__.py
 deepkin/production/agai_backend.py
+deepkin/production/tts_backend.py
 deepkin/train/__init__.py
 deepkin/train/flex_train_tools.py
 deepkin/train/flex_trainer.py
